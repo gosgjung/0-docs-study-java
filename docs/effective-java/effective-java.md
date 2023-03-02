@@ -1,9 +1,9 @@
 ---
 layout: default
-title: UI Components
-nav_order: 3
+title: Effective Java
+nav_order: 2
 has_children: true
-permalink: /docs/ui-components
+permalink: /docs/effective-java
 ---
 
 # UI Components
