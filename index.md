@@ -15,7 +15,8 @@ permalink: /
 ---
 
 - Effective Java
-- JVM
 - Java Basic
+- JVM
+- Modern Java
 - 병렬프로그래밍 (CompletableFuture, Executors 프레임워크)
 
