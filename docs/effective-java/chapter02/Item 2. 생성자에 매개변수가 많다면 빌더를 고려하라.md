@@ -3,9 +3,9 @@ layout: default
 title: Item 2. 생성자에 매개변수가 많다면 빌더를 고려하라
 nav_order: 2
 has_children: false
-parent:  Ch01
+parent:  Ch02
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item02
+permalink: /docs/effective-java/chapter02/item02
 layout: default
 ---
 

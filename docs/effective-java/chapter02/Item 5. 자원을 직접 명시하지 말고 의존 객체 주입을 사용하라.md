@@ -3,9 +3,9 @@ layout: default
 title: Item 5. 자원을 직접 명시하지 말고 의존객체 주입을 사용하라
 nav_order: 5
 has_children: false
-parent:  Ch01
+parent:  Ch02
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item05
+permalink: /docs/effective-java/chapter02/item05
 layout: default
 ---
 

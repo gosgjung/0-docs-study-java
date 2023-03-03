@@ -3,9 +3,9 @@ layout: default
 title: Item 7. 불필요한 객체 생성을 피하라
 nav_order: 7
 has_children: false
-parent:  Ch01
+parent:  Ch02
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item07
+permalink: /docs/effective-java/chapter02/item07
 layout: default
 ---
 

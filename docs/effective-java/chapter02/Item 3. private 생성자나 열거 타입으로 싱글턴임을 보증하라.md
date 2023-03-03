@@ -3,9 +3,9 @@ layout: default
 title: Item 3. private 생성자나 열거 타입으로 싱글턴임을 보증하라
 nav_order: 3
 has_children: false
-parent:  Ch01
+parent:  Ch02
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item03
+permalink: /docs/effective-java/chapter02/item03
 layout: default
 ---
 

@@ -3,9 +3,9 @@ layout: default
 title: Item 1. 생성자 대신 정적 팩터리 메서드를 고려하라
 nav_order: 1
 has_children: false
-parent:  Ch01
+parent:  Ch02
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item01
+permalink: /docs/effective-java/chapter02/item01
 layout: default
 ---
 
