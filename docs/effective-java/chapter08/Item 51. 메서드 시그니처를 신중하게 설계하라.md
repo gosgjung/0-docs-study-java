@@ -191,11 +191,3 @@ List 인터페이스는 아래의 메서드들을 통해 기능을 두개로 분
 - 클라이언트 측에서는 `execute` 메서드를 호출해 매개변수들의 유효성을 검증
 
 <br>
-
-책에서는 이렇게 언급하고 있지만, 실무에서는 아마도 빌더 패턴을 적극적으로 활용하게 되지 않을까 싶다. 빌더 패턴을 사용하게 될 경우 크게 아래의 두가지 방식으로 사용하게 될 것 같다.
-
-- 직접 구현한 빌더 패턴을 사용하고, `build()` 메서드 내에서 매개변수가 올바른지 검사
-- `lombok` 의 빌더 패턴을 사용하고, `build()` 메서드를 커스텀으로 정의해서 validation 구문을 정의
-  - 이 부분에 대한 내용은 [Add Custom Validations with Lombok Builders](https://trguduru.github.io/2019/06/add-custom-validations-with-lombok-builders/) 을 참고하자.
-
-[Add Custom Validations with Lombok Builders](https://trguduru.github.io/2019/06/add-custom-validations-with-lombok-builders/) 의 예제중 일부를 발췌해보면 아래와 같다.
