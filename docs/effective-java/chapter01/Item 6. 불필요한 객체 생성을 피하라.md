@@ -58,7 +58,7 @@ layout: default
 {: .fs-6 .fw-700 }
 
 #### 불변객체 (e.g. String)
-{: .fs-6 .fw-700 }
+{: .fs-5 .fw-700 }
 
 당연한 이야기이지만, 굉장히 자주 언급되는 String의 Constant Pool 관련 이야기다.
 String 을 아래와 같이 선언하면 객체를 매번 새로 사용하게 된다.
