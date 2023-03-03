@@ -5,7 +5,7 @@ nav_order: 3
 has_children: false
 parent:  Ch08. 메서드
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter08/item01
+permalink: /docs/effective-java/chapter08/item51
 layout: default
 ---
 
