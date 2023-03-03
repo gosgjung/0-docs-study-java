@@ -5,7 +5,7 @@ nav_order: 3
 has_children: false
 parent:  Ch01
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter01/item02
+permalink: /docs/effective-java/chapter01/item03
 layout: default
 ---
 
