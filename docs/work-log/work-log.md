@@ -6,7 +6,7 @@ has_children: true
 permalink: /docs/work-log
 ---
 
-# Effective Java Docs
+# Work Log
 {: .fs-6 .fw-700 }
 
 그냥 이래저래 개인적인 생각들\~\~
