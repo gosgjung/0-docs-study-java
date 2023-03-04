@@ -3,7 +3,7 @@ layout: default
 title: Item 3. private 생성자나 열거 타입으로 싱글턴임을 보증하라
 nav_order: 3
 has_children: false
-parent:  Ch02
+parent:  Ch02. 객체 생성과 파괴
 grand_parent: Effective Java
 permalink: /docs/effective-java/chapter02/item03
 layout: default

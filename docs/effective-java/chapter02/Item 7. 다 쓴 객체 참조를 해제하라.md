@@ -3,7 +3,7 @@ layout: default
 title: Item 7. 불필요한 객체 생성을 피하라
 nav_order: 7
 has_children: false
-parent:  Ch02
+parent:  Ch02. 객체 생성과 파괴
 grand_parent: Effective Java
 permalink: /docs/effective-java/chapter02/item07
 layout: default

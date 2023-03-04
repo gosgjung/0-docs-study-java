@@ -3,7 +3,7 @@ layout: default
 title: Item 2. 생성자에 매개변수가 많다면 빌더를 고려하라
 nav_order: 2
 has_children: false
-parent:  Ch02
+parent:  Ch02. 객체 생성과 파괴
 grand_parent: Effective Java
 permalink: /docs/effective-java/chapter02/item02
 layout: default
