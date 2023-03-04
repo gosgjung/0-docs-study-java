@@ -6,7 +6,10 @@ has_children: true
 permalink: /docs/effective-java
 ---
 
-# UI Components
+# Effective Java Docs
+{: .fs-6 .fw-700 }
 
-To make it as easy as possible to write documentation in plain Markdown, most UI components are styled using default Markdown elements with few additional CSS classes needed.
+[Effective Java 3/E](http://www.yes24.com/Product/Goods/65551284) 의 내용들을 정리해나가는 Docs
 {: .fs-6 .fw-300 }
+
+
