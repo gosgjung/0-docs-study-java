@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Item 69. 예외는 진짜 예외상황에만 사용하라
-nav_order: 3
+nav_order: 1
 has_children: false
 parent:  Ch10. 예외
 grand_parent: Effective Java
