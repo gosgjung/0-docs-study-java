@@ -1,17 +1,17 @@
 ---
 layout: default
-title: Item 70. 필요없는 검사 예외 사용은 피하라
-nav_order: 2
+title: Item 71. 필요없는 검사 예외 사용은 피하라
+nav_order: 3
 has_children: false
 parent:  Ch10. 예외
 grand_parent: Effective Java
-permalink: /docs/effective-java/chapter10/item70
+permalink: /docs/effective-java/chapter10/item71
 layout: default
 ---
 
 
 
-# Item 70. 필요없는 검사 예외 사용은 피하라
+# Item 71. 필요없는 검사 예외 사용은 피하라
 {: .no_toc }
 
 검사 예외라는 용어는 되도록 `Checked Exception` 이라는 용어로 바꿔서 정리하기로 했다.<br>
