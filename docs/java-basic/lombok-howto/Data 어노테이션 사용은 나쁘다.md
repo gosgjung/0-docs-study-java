@@ -127,90 +127,95 @@ public void SETTER_TEST(){
 이미 생성된 객체에 setter 를 사용하는 로직들은 아래의 문제가 있지 않을까 싶다.
 
 - 특정 필드를 어디에서 수정하는지 연관된 부분들을 일일이 이잡듯이 뒤져서 찾아내야 한다.
-- 코드가 방대해지면, 막상 영향이 가는 부분인지 알수 없어지기에 고치기 쉽지 않은 소프트웨어가 된다.
+- 코드가 방대해지면, 막상 영향이 가는 부분이 어디에서 호출하는 setter 인지 알수 없어지기에 고치기 쉽지 않은 소프트웨어가 된다.
 - 이미 생성된 객체에 대해 set 을 하는지, 새로 생성한 객체에 대해 set 을 하는지도 일일이 callstack 을 일일이 그려가며 체크해야 한다.
 
-
 여기에 더해 동시성/병렬성 환경에서도 문제가 된다. 생성된 객체의 외부가 멀티스레드를 사용하고 있고, 객체의 외부에서 setter를 호출하고 있을 때 setter 로 인해 객체 내의 데이터가 모호해지는 것을 방지할 수 없게 된다.
+<br>
+
 e.g.
 ```java
 public void SomeTest{
     // ...
 
-    public void addOAuth2PrefixVendor(Member member, String vendor){
-        final String email = new StringBuilder("###OAuth2###").append(vendor)
-                .append("###").append(member.getEmail())
-                .toString();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-        member.setEmail(email);
+    public void asyncEncodeEmail(Member member){
+        executorService.submit(() -> {
+            member.setEmail(Base64.getEncoder().encodeToString(member.getEmail().getBytes()));
+        });
+    }
+
+    @Test
+    public void ASYNC_ENCODE_EMAIL_TEST(){
+        Member member = new Member();
+        member.setEmail("abc@gmail.com");
+
+        for(int i=0; i<100; i++){
+            member.setEmail("111@GMAIL.COM");
+            asyncEncodeEmail(member);
+            System.out.println(">>> (1) " + member.getEmail());
+
+            member.setEmail("abc@gmail.com");
+            asyncEncodeEmail(member);
+            System.out.println(">>> (2) " + member.getEmail());
+        }
+    }
+
+    @AfterEach
+    public void destroy(){
+        executorService.shutdownNow();
     }
 }
 ```
 <br>
 <br>
 
-잠깐 백업을 위해 임시커밋...
+위 코드는 아래의 결과를 낸다.
+```plain
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) MTExQEdNQUlMLkNPTQ==
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) abc@gmail.com
+>>> (1) 111@GMAIL.COM
+>>> (2) MTExQEdNQUlMLkNPTQ==
 
-### 2\) @ToString - 양방향 순환 참조 문제
-{: .fs-6 .fw-700 }
+// ...
 
-```java
-@Entity
-@Table(name = "member")
-@Data
-public class Member{
-	// ...
-	@OneToMany
-	@JoinColumn(name = "coupon_id")
-	private List<Coupon> coupons = new ArrayList<>();
-
-}
-
-@Entity
-@Table(name = "coupon")
-@Data
-public class Coupon{
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-
-	@ManyToOne
-	private Member member;
-
-	public Coupon(Member member){
-		this.member = member;
-	}
-}
 ```
+<br>
 
+조금은 단적인 예제이긴 하지만 위 코드의 결과를 유추해보면... <br>
+
+어떤 케이스에는 asyncEncodeEmail 로 BASE64 인코딩한 결과가 `email` 필드에 저장되고, 어떤 케이스에는 BASE64 로 인코딩하지 않은 결과가 email 필드에 저장된다. 멀티스레드 코드에서 setter 를 사용하게되어 정확한 동작을 보장하기 어렵게 되었다.<br>
+
+생성된 객체 내에서 자기자신의 필드를 수정하는 것은 동시성이 보장되지만, 위의 코드 처럼 이미 생성된 객체 외부에서 객체의 필드를 동시성/병렬성 환경에서 수정하게 되면 정확한 값을 보장할 수 없다. 위의 예는 조금은 단적인 예이긴 하지만, 병렬스레드를 사용하는 레거시 코드에서 데이터의 전처리를 하는 코드를 수행할 경우 setter 가 있으면 굉장히 많은 고민을 하게 된다. 필드를 객체 외부에서 수정하는지 객체 내부에서 수정하는지, callstack 은 어떻게 되는지 등을 고민하게 된다. 일을 하는 시간의 대부분을 callstack 을 그리는데에 사용하게 될 가능성이 높아지게 된다.<br>
+<br>
+
+예를 들면 비정형 데이터를 정형 데이터로 변경하는 코드에서 setter 가 쓰이는 레거시 코드가 꽤 많다. <br>
+여러가지 해결책이 있겠지만, setter 를 써야할 것 같은 레거시 코드를 개선하는 대표적인 해결책은 아래의 방법들이 있지 않을까 싶다.<br>
+
+- Member 클래스 내부에 데이터 바인딩을 위한 별도의 Inner Class 를 임시버퍼 처럼 두어서 데이터 바인딩이 완료 된 후 객체를 새로 생성 후 외부로 리턴하는 방법
+  - 빌더 패턴과 유사한 방식이다. 
+- 정적 팩터리 메서드를 사용하는 방식
+  - static 메서드는 병렬환경에서 원자적 접근이 가능하다.
+<br>
 <br>
 
 
-
-```java
-@Test
-// Member 클래스 내에 @Exclude 어노테이션을 주석 처리 후 실행하면
-// StackOverflow가 발생하게 된다.
-public void toString_양방향_순한_참조_문제() {
-    final Member member = new Member();
-    member.setEmail("asd@asd.com");
-    member.setName("name");
-
-    final Coupon coupon = new Coupon();
-    coupon.setMember(member);
-
-    final List<Coupon> coupons = new ArrayList<>();
-    coupons.add(coupon);
-    member.setCouponList(coupons);
-
-    System.out.println(member); // toString 순한 참조 발생
-}
-```
-
-<br>
-
-
-
-### 3\) @EqualsAndHashCode 의 남용
+### 2\) @ToString 양방향 순환 참조 문제
 {: .fs-6 .fw-700 }
+으어어... 임시커밋
 
+### 3\) @EqualsAndHashCode 로 인해 갈수록 무거워지는 코드
+{: .fs-6 .fw-700 }
