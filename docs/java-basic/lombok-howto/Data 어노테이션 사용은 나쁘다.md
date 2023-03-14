@@ -50,6 +50,7 @@ permalink: /docs/java-basic/lombok-howto/why-do-not-use-lombok-data
 예를 들어 아래와 같은 코드가 있다고 해보자.
 
 ```java
+@NoArgsConstructor
 @Data
 @Entity
 public class Member {
@@ -59,10 +60,11 @@ public class Member {
     private String email;
     private String name;
 
-    @OneToMany
-    @JoinColumn(name = "coupon_id")
-    private List<Coupon> coupons = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dept_id")
+    private Department department;
 }
+
 ```
 
 <br>
@@ -218,7 +220,164 @@ public void SomeTest{
 
 ### 2\) @ToString 양방향 순환 참조 문제
 {: .fs-6 .fw-700 }
-으어어... 임시커밋
+
+JPA 에서만 문제되는 것만은 아니다. 객체 내에 List\<다른객체\> 를 바인딩하는 필드가 있을 때 두 객체 모두 @Data 또는 @ToString 을 포함하고 있다면, 롬복의 @ToString의 양방향 순환참조 문제가 발생한다. 양방향 순환참조가 발생하면 toStringd 을 무한으로 생성하다보니 StackOverflowError 가 발생한다.
+<br>
+
+간단한 내용이기에 예제만 정리해봤다.<br>
+**Member.java**<br>
+```java
+@NoArgsConstructor
+@Data
+@Entity
+public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String email;
+    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dept_id")
+    private Department department;
+}
+```
+<br>
+
+**Department.java**
+```java
+@Entity
+@Table
+@Data
+public class Department {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String deptName;
+
+    @OneToMany(mappedBy = "department")
+    private List<Member> members = new ArrayList<>();
+}
+```
+<br>
+
+두 객체간의 참조 관계가 위와 같다고 해보자. 이제 테스트코드다.
+```java
+public class ToStringTest {
+
+    @Test
+    public void 양방향_순환_참조_TEST(){
+        final Member member = new Member();
+        member.setName("abc");
+        member.setEmail("abc@gmail.com");
+
+        Department deptTrader = new Department();
+        member.setDepartment(deptTrader);
+
+        List<Member> members = new ArrayList<>();
+        members.add(member);
+        deptTrader.setMembers(members);
+
+        Assertions.assertThatThrownBy(
+            () -> System.out.println(member)
+        ).isInstanceOf(StackOverflowError.class);
+    }
+}
+```
+<br>
+StackOverflowError 가 발생한다. 양방향 순환 참조 문제가 발생하기 때문이다.<br>
+<br>
+<br>
 
 ### 3\) @EqualsAndHashCode 로 인해 갈수록 무거워지는 코드
 {: .fs-6 .fw-700 }
+
+build/classes/java/main/[패키지경로]/Member.java 를 열어보면 아래와 같이 equals() 메서드가 생성되어 있다.
+> 롬복이 적용된 코드는 프로젝트 내의 build/classes/java/... 내의 .class 파일을 열어보면 확인가능하다.
+<br>
+
+
+```java
+@Entity
+public class Member {
+    // ...
+
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof Member)) {
+            return false;
+        } else {
+            Member other = (Member)o;
+            if (!other.canEqual(this)) {
+                return false;
+            } else {
+                label59: {
+                    Object this$id = this.getId();
+                    Object other$id = other.getId();
+                    if (this$id == null) {
+                        if (other$id == null) {
+                            break label59;
+                        }
+                    } else if (this$id.equals(other$id)) {
+                        break label59;
+                    }
+
+                    return false;
+                }
+
+                Object this$email = this.getEmail();
+                Object other$email = other.getEmail();
+                if (this$email == null) {
+                    if (other$email != null) {
+                        return false;
+                    }
+                } else if (!this$email.equals(other$email)) {
+                    return false;
+                }
+
+                Object this$name = this.getName();
+                Object other$name = other.getName();
+                if (this$name == null) {
+                    if (other$name != null) {
+                        return false;
+                    }
+                } else if (!this$name.equals(other$name)) {
+                    return false;
+                }
+
+                Object this$department = this.getDepartment();
+                Object other$department = other.getDepartment();
+                if (this$department == null) {
+                    if (other$department != null) {
+                        return false;
+                    }
+                } else if (!this$department.equals(other$department)) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+    }
+}
+```
+<br>
+<br>
+
+만약 불필요한 필드에 대해 equals, hashcode를 생성하는 것을 방지하려면 아래와 같이 exclude 해주면 된다.
+```java
+@EqualsAndHashCode(exclude = {"name", "department"})
+public class Member{
+    // ...
+}
+```
+<br>
+
+Member 클래스의 필드는 id, email, name, department 뿐인데, equals 로 생성된 구문은 꽤 많다. Member 클래스의 동치성 비교는 id, email 정도만해도 비교가 충분해보인다.<br>
+
+이 외에도 hashCode() 역시 불필요한 코드에 대해 수행하고 있다.<br>
+
+<br>
+
+수없이 많은 equals(), hashcode() 를 무방비로 만들어서 무겁게 만들지 않으려면, 가급적  `@Data` 어노테이션을 사용하는 것 만큼은 자제하자.
